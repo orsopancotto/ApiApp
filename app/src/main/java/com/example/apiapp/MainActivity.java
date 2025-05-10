@@ -5,9 +5,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,10 +19,26 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class MainActivity extends AppCompatActivity {
-    public static final String baseUrl = "https://api.open-meteo.com/v1/";
-    private TextView textView;
-    private Button getButton;
+
+import java.util.Map;
+import java.util.Optional;
+
+
+import android.os.Bundle;
+
+import android.widget.Button;
+import android.widget.TextView;
+
+import androidx.activity.EdgeToEdge;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.example.apiapp.enums.WeatherCode;
+
+public class MainActivity extends ClientActivity {
+    private TextView tvResponse;
+    private Button fetchDataButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,48 +51,49 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        Client.createClient(getApplicationContext());
+        client = new Client();
 
-        textView = findViewById(R.id.textView);
+        tvResponse = findViewById(R.id.tvResponse);
 
-        getButton = findViewById(R.id.getBtn);
-        getButton.setOnClickListener(this::getWeather);
+        fetchDataButton = findViewById(R.id.getBtn);
+        fetchDataButton.setOnClickListener(view -> client.getCurrentWeather(this));
+        //fetchDataButton.setOnClickListener(view -> client.getRawJson(this));
     }
 
-    private void getWeather(View view){
-        Call<WeatherData> call = Client
-                .getClient()
-                .getController()
-                .getWeatherData();
-        call.enqueue(new Callback<WeatherData>() {
-            @Override
-            public void onResponse(Call<WeatherData> call, Response<WeatherData> response){
-                if(response.code() != 200){
-                    MessagesDisplayer.printMessage(getApplicationContext(), "Cassofica qualcosa è anato storto :(\nCodice: " + response.code(), 0);
-                    return;
-                }
+    @Override
+    public void displayResponseBody(WeatherModel responseBody){
+        String text = "";
 
-                if (response.body() == null) {
-                    MessagesDisplayer.printMessage(getApplicationContext(), "Cassofica la risposta è nulla :(", 0);
-                    return;
-                }
+        if(responseBody == null || responseBody.current == null){
+            text += "No Info";
+        }
+        else{
+            text += "Weather: " + WeatherCode.getCode(responseBody.current.weather_code).toString() + "\n";
+            text += "Temperature: " + responseBody.current.temperature_2m + "°C" + "\n";
+            text += "Apparent temperature: " + responseBody.current.apparent_temperature + "°C" + "\n";
+            text += responseBody.current.is_day == 1 ? "Daylight" : "Night";
+        }
 
-                int currentIndex = response
-                        .body()
-                        .hourly
-                        .time
-                        .indexOf("2025-05-05T01:00");
+        tvResponse.setText(text);
+    }
 
-                String result = "current temperature: " + response.body().hourly.temperature_2m.get(currentIndex) +
-                        "\n current apparent temperature: " + response.body().hourly.apparent_temperature.get(currentIndex);
+    @Override
+    public void displayResponseBody(String responseBody){
+        String text = "";
 
-                textView.setText(result);
-            }
+        if(responseBody == null){
+            text += "No Info";
+        }
+        else{
+            text = responseBody;
+        }
 
-            @Override
-            public void onFailure(Call<WeatherData> call, Throwable throwable) {
-                MessagesDisplayer.printMessage(getApplicationContext(), "Cassofica richiesta fallita :(\nMessaggio: " + throwable.getMessage(), 0);
-            }
-        });
+        tvResponse.setText(text);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        client.cancelWebRequests();
     }
 }
