@@ -2,4 +2,16 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="pink1">#F78DA7</color>
+    <color name="pink2">#FADADD</color>
+    <color name="pink3">#D291BC</color>
+    <color name="pink4">#F5CED8</color>
+    <color name="pink5">#A05195</color>
+    <color name="pink6">#FFE6F0</color>
+    <color name="pink7">#CBAACB</color>
+    <color name="pink8">#FF5E78</color>
+    <color name="pink9">#E8D3E8</color>
+    <color name="pink10">#FFB6B9</color>
+    <color name="pink11">#5D1049</color>
+    <color name="pink12">#FFF0F5</color>
 </resources>

@@ -1,8 +1,7 @@
 package com.example.apiapp;
 
-import android.app.Activity;
+import com.example.apiapp.enums.HourlyQueryParam;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import okhttp3.ResponseBody;
@@ -12,12 +11,18 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class Client {
-    private final String baseUrl = "https://api.open-meteo.com/v1/";
-    private final ApiController controller;
-    private final ArrayList<Call<WeatherModel>> currentWeatherCalls;
+public final class Client {
+    private static final String baseUrl = "https://api.open-meteo.com/v1/";
+    private static ApiController controller = null;
+    private static ArrayList<Call<WeatherModel>> currentWeatherCalls = null;
 
-    public Client(){
+    private Client(){
+        throw new AssertionError("Static!");
+    }
+
+    public static void create(){
+        if(controller != null || currentWeatherCalls != null) return;
+
         Retrofit retrofit = new Retrofit
                 .Builder()
                 .baseUrl(baseUrl)
@@ -36,11 +41,12 @@ public class Client {
         return baseUrl;
     }
 
-    public void getCurrentWeather(ClientActivity activity){
+    public static void getCurrentWeather(OnResponseListener listener){
         QueryBuilder queryBuilder = new QueryBuilder
                 .Builder(44.4938f, 11.3387f)
                 .setTimezone("CET")
                 .setAllCurrentQueryParams()
+                .setAllHourlyQueryParams()
                 .build();
 
         Call<WeatherModel> call = controller.getWeatherData(queryBuilder.createQuery());
@@ -49,18 +55,18 @@ public class Client {
             @Override
             public void onResponse(Call<WeatherModel> call, Response<WeatherModel> response){
                 if(response.code() != 200){
-                    activity.printQuickMessage("Not ok :(\nCodice: " + response.code(), 0);
+                    listener.handleResponseCode(response.code(), "");
                     currentWeatherCalls.remove(call);
-                    return;
                 }
 
-                activity.displayResponseBody(response.body());
+                listener.onWeatherDataResponse(response.body());
                 currentWeatherCalls.remove(call);
             }
 
             @Override
             public void onFailure(Call<WeatherModel> call, Throwable throwable) {
-                activity.printQuickMessage("Cassofica richiesta fallita :(\nMessaggio: " + throwable.getMessage(), 0);
+                listener.handleResponseCode(0, throwable.getMessage());
+                listener.onWeatherDataResponse(null);
                 currentWeatherCalls.remove(call);
             }
         });
@@ -68,7 +74,7 @@ public class Client {
         currentWeatherCalls.add(call);
     }
 
-    public void getRawJson(ClientActivity activity){
+    public static void getRawJson(OnResponseListener listener){
         QueryBuilder queryBuilder = new QueryBuilder
                 .Builder(44.4938f, 11.3387f)
                 .setTimezone("CET")
@@ -81,30 +87,24 @@ public class Client {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response){
                 if(response.code() != 200){
-                    activity.printQuickMessage("Not ok :(\nCodice: " + response.code(), 0);
+                    listener.handleResponseCode(response.code(), "");
                     currentWeatherCalls.remove(call);
-                    return;
                 }
 
-                try {
-                    activity.displayResponseBody(response.body().string());
-                } catch (IOException e) {
-                    activity.printQuickMessage("Exception!\n" + e, 1);
-                }
+                listener.onRawJsonResponse(response.body().toString());
                 currentWeatherCalls.remove(call);
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable throwable) {
-                activity.printQuickMessage("Cassofica richiesta fallita :(\nMessaggio: " + throwable.getMessage(), 0);
+                listener.handleResponseCode(0, throwable.getMessage());
+                listener.onRawJsonResponse("Err");
                 currentWeatherCalls.remove(call);
             }
         });
-
-        //currentWeatherCalls.add(call);
     }
 
-    public void cancelWebRequests(){
+    public static void cancelWebRequests(){
         if(currentWeatherCalls.isEmpty()) return;
 
         for(var call : currentWeatherCalls){
@@ -112,4 +112,3 @@ public class Client {
         }
     }
 }
-

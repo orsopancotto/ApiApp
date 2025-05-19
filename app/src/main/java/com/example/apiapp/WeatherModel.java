@@ -36,6 +36,7 @@ public class WeatherModel {
         public ArrayList<Float> apparent_temperature;
         public ArrayList<Integer> precipitation_probability;
         public ArrayList<Integer> weather_code;
+        public ArrayList<Integer> is_day;
     }
 
     public class Daily{

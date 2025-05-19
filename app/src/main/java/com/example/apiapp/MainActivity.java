@@ -1,44 +1,19 @@
 package com.example.apiapp;
 
 import android.os.Bundle;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
-
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
 
+import com.example.apiapp.fragments.CurrentWeatherFragment;
+import com.example.apiapp.fragments.ForecastWeatherFragment;
+import com.google.android.material.tabs.TabLayout;
 
-import java.util.Map;
-import java.util.Optional;
-
-
-import android.os.Bundle;
-
-import android.widget.Button;
-import android.widget.TextView;
-
-import androidx.activity.EdgeToEdge;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import com.example.apiapp.enums.WeatherCode;
-
-public class MainActivity extends ClientActivity {
-    private TextView tvResponse;
-    private Button fetchDataButton;
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,49 +26,36 @@ public class MainActivity extends ClientActivity {
             return insets;
         });
 
-        client = new Client();
+        Client.create();
 
-        tvResponse = findViewById(R.id.tvResponse);
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                Fragment newFragment = tab.getPosition() == 0 ?
+                        new CurrentWeatherFragment() : new ForecastWeatherFragment();
 
-        fetchDataButton = findViewById(R.id.getBtn);
-        fetchDataButton.setOnClickListener(view -> client.getCurrentWeather(this));
-        //fetchDataButton.setOnClickListener(view -> client.getRawJson(this));
-    }
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragmentContainer, newFragment)
+                        .commit();
+            }
 
-    @Override
-    public void displayResponseBody(WeatherModel responseBody){
-        String text = "";
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
 
-        if(responseBody == null || responseBody.current == null){
-            text += "No Info";
-        }
-        else{
-            text += "Weather: " + WeatherCode.getCode(responseBody.current.weather_code).toString() + "\n";
-            text += "Temperature: " + responseBody.current.temperature_2m + "°C" + "\n";
-            text += "Apparent temperature: " + responseBody.current.apparent_temperature + "°C" + "\n";
-            text += responseBody.current.is_day == 1 ? "Daylight" : "Night";
-        }
+            }
 
-        tvResponse.setText(text);
-    }
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
 
-    @Override
-    public void displayResponseBody(String responseBody){
-        String text = "";
-
-        if(responseBody == null){
-            text += "No Info";
-        }
-        else{
-            text = responseBody;
-        }
-
-        tvResponse.setText(text);
+            }
+        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        client.cancelWebRequests();
+        Client.cancelWebRequests();
     }
 }
