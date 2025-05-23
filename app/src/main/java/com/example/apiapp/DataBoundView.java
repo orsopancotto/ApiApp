@@ -1,4 +1,4 @@
-package com.example.apiapp.UI;
+package com.example.apiapp;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -8,20 +8,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.example.apiapp.WeatherModel;
-
 public abstract class DataBoundView extends ConstraintLayout {
 
     public DataBoundView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         LayoutInflater
                 .from(context)
-                .inflate(setViewResource(), this, true);
+                .inflate(getViewResource(), this, true);
         setWidgetsReferences();
     }
 
-    protected abstract int setViewResource();
+    protected abstract int getViewResource();
     protected abstract void setWidgetsReferences();
     protected abstract void displayData();
-    public abstract void bindData(@Nullable WeatherModel data, @Nullable String indexValue);
 }

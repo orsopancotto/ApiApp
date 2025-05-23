@@ -1,6 +1,9 @@
 package com.example.apiapp;
 
-import com.example.apiapp.enums.HourlyQueryParam;
+import com.example.apiapp.interfaces.ApiController;
+import com.example.apiapp.interfaces.CurrentWeatherResponseListener;
+import com.example.apiapp.interfaces.BaseResponseListener;
+import com.example.apiapp.interfaces.HourlyWeatherResponseListener;
 
 import java.util.ArrayList;
 
@@ -41,11 +44,46 @@ public final class Client {
         return baseUrl;
     }
 
-    public static void getCurrentWeather(OnResponseListener listener){
+    public static void getCurrentWeather(CurrentWeatherResponseListener listener){
         QueryBuilder queryBuilder = new QueryBuilder
                 .Builder(44.4938f, 11.3387f)
                 .setTimezone("CET")
                 .setAllCurrentQueryParams()
+                .build();
+
+        Call<WeatherModel> call = controller.getWeatherData(queryBuilder.createQuery());
+
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call<WeatherModel> call, Response<WeatherModel> response){
+                if(response.code() != 200){
+                    listener.handleResponseCode(response.code(), "");
+                    currentWeatherCalls.remove(call);
+                }
+                else if(response.body() == null){
+                    listener.handleResponseCode(response.code(), "Null response");
+                    currentWeatherCalls.remove(call);
+                }
+
+                listener.onResponse(response.body().current);
+                currentWeatherCalls.remove(call);
+            }
+
+            @Override
+            public void onFailure(Call<WeatherModel> call, Throwable throwable) {
+                listener.handleResponseCode(0, throwable.getMessage());
+                listener.onResponse(null);
+                currentWeatherCalls.remove(call);
+            }
+        });
+
+        currentWeatherCalls.add(call);
+    }
+
+    public static void getHourlyWeather(HourlyWeatherResponseListener listener){
+        QueryBuilder queryBuilder = new QueryBuilder
+                .Builder(44.4938f, 11.3387f)
+                .setTimezone("CET")
                 .setAllHourlyQueryParams()
                 .build();
 
@@ -58,15 +96,19 @@ public final class Client {
                     listener.handleResponseCode(response.code(), "");
                     currentWeatherCalls.remove(call);
                 }
+                else if(response.body() == null){
+                    listener.handleResponseCode(response.code(), "Null response");
+                    currentWeatherCalls.remove(call);
+                }
 
-                listener.onWeatherDataResponse(response.body());
+                listener.onResponse(response.body().hourly);
                 currentWeatherCalls.remove(call);
             }
 
             @Override
             public void onFailure(Call<WeatherModel> call, Throwable throwable) {
                 listener.handleResponseCode(0, throwable.getMessage());
-                listener.onWeatherDataResponse(null);
+                listener.onResponse(null);
                 currentWeatherCalls.remove(call);
             }
         });
@@ -74,7 +116,7 @@ public final class Client {
         currentWeatherCalls.add(call);
     }
 
-    public static void getRawJson(OnResponseListener listener){
+    public static void getRawJson(BaseResponseListener listener){
         QueryBuilder queryBuilder = new QueryBuilder
                 .Builder(44.4938f, 11.3387f)
                 .setTimezone("CET")

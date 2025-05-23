@@ -9,22 +9,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.example.apiapp.Client;
-import com.example.apiapp.OnResponseListener;
+import com.example.apiapp.interfaces.CurrentWeatherResponseListener;
 import com.example.apiapp.R;
-import com.example.apiapp.UI.DataBoundView;
-import com.example.apiapp.UI.HourlyWeatherItem;
+import com.example.apiapp.DataBoundView;
 import com.example.apiapp.WeatherModel;
+import com.example.apiapp.interfaces.HourlyWeatherResponseListener;
 
 import java.util.ArrayList;
 
-public class CurrentWeatherFragment extends Fragment implements OnResponseListener {
-    private final ArrayList<DataBoundView> views = new ArrayList<>();
-
+public class CurrentWeatherFragment extends Fragment implements CurrentWeatherResponseListener, HourlyWeatherResponseListener {
 
     public CurrentWeatherFragment() {
         // Required empty public constructor
@@ -51,26 +48,25 @@ public class CurrentWeatherFragment extends Fragment implements OnResponseListen
         Button button = requireActivity().findViewById(R.id.btnSwitchView);
         button.setOnClickListener(view -> viewSwitcher.showNext());
 
-        views.add(requireActivity().findViewById(R.id.viwCurrentGeneralWeather));
-        views.add(requireActivity().findViewById(R.id.viwCurrentDetailsWeather));
+        currentWeatherViews.add(requireActivity().findViewById(R.id.viwCurrentGeneralWeather));
+        currentWeatherViews.add(requireActivity().findViewById(R.id.viwCurrentDetailsWeather));
+        hourlyWeatherViews.add(requireActivity().findViewById(R.id.viwHourlyWeather));
+
         Client.getCurrentWeather(this);
+        Client.getHourlyWeather(this);
     }
 
     @Override
-    public void onWeatherDataResponse(@Nullable WeatherModel responseBody) {
-        for(var view : views){
-            view.bindData(responseBody, null);
+    public void onResponse(@Nullable WeatherModel.Current responseBody) {
+        for(var view : currentWeatherViews){
+            view.bindData(responseBody);
         }
+    }
 
-        try{
-            LinearLayout layout = requireActivity().findViewById(R.id.llHourlyWeather);
-            for(var hour : responseBody.hourly.time){
-                var item = new HourlyWeatherItem(requireContext(), null);
-                layout.addView(item);
-                item.bindData(responseBody, hour);
-            }
-        } catch (Exception e) {
-            Toast.makeText(requireContext(), "Err: " + e.getCause(), Toast.LENGTH_LONG).show();
+    @Override
+    public void onResponse(@Nullable WeatherModel.Hourly responseBody) {
+        for(var view : hourlyWeatherViews){
+            view.bindData(responseBody);
         }
     }
 

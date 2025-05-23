@@ -7,10 +7,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.apiapp.CWDataBoundView;
+import com.example.apiapp.DataBoundView;
 import com.example.apiapp.R;
 import com.example.apiapp.WeatherModel;
 
-public class CurrentDetailsWeatherView extends DataBoundView {
+public class CurrentDetailsWeatherView extends CWDataBoundView {
     TextView tvCurrentDetails;
     private float rain;
     private float showers;
@@ -25,7 +27,7 @@ public class CurrentDetailsWeatherView extends DataBoundView {
     }
 
     @Override
-    protected int setViewResource() {
+    protected int getViewResource() {
         return R.layout.view_current_info_details;
     }
 
@@ -48,19 +50,19 @@ public class CurrentDetailsWeatherView extends DataBoundView {
     }
 
     @Override
-    public void bindData(@Nullable WeatherModel data, @Nullable String indexValue) {
+    public void bindData(@Nullable WeatherModel.Current data) {
         if(data == null){
             displayDebugMessage();
             return;
         }
 
-        rain = data.current.rain;
-        showers = data.current.showers;
-        snowfall = data.current.snowfall;
-        wind_speed_10m = data.current.wind_speed_10m;
-        wind_direction_10m = data.current.wind_direction_10m;
-        wind_gusts_10m = data.current.wind_gusts_10m;
-        relative_humidity_2m = data.current.relative_humidity_2m;
+        rain = data.rain;
+        showers = data.showers;
+        snowfall = data.snowfall;
+        wind_speed_10m = data.wind_speed_10m;
+        wind_direction_10m = data.wind_direction_10m;
+        wind_gusts_10m = data.wind_gusts_10m;
+        relative_humidity_2m = data.relative_humidity_2m;
 
         displayData();
     }

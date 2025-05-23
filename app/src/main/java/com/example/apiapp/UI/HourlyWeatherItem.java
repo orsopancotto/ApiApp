@@ -7,12 +7,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.apiapp.HWDataBoundView;
 import com.example.apiapp.R;
 import com.example.apiapp.WeatherModel;
 
 import org.jetbrains.annotations.NotNull;
 
-public class HourlyWeatherItem extends DataBoundView {
+public class HourlyWeatherItem extends HWDataBoundView {
     private TextView hour, temperature, apparentTemp, precipitationProb;
     private String time;
     private float temperature_2m;
@@ -26,8 +27,8 @@ public class HourlyWeatherItem extends DataBoundView {
     }
 
     @Override
-    protected int setViewResource() {
-        return R.layout.hourly_weather_item;
+    protected int getViewResource() {
+        return R.layout.item_hourly_weather;
     }
 
     @Override
@@ -47,24 +48,29 @@ public class HourlyWeatherItem extends DataBoundView {
     }
 
     @Override
-    public void bindData(@Nullable WeatherModel data, @Nullable String indexValue) {
+    public void bindData(@Nullable WeatherModel.Hourly data) {
+        displayDebugMessage("Err");
+    }
+
+    @Override
+    public void bindData(@Nullable WeatherModel.Hourly data, @NotNull String indexValue) {
         if(data == null){
             displayDebugMessage("No info");
             return;
         }
 
-        int index = data.hourly.time.indexOf(indexValue);
-        if(index == -1 || indexValue == null || indexValue.isEmpty()){
+        int index = data.time.indexOf(indexValue);
+        if(index == -1 || indexValue.isEmpty()){
             displayDebugMessage("Err");
             return;
         }
 
         time = indexValue.substring(indexValue.length() - 5);
-        temperature_2m = data.hourly.temperature_2m.get(index);
-        apparent_temperature = data.hourly.apparent_temperature.get(index);
-        precipitation_probability = data.hourly.precipitation_probability.get(index);
-        weather_code = data.hourly.weather_code.get(index);
-        is_day = data.hourly.is_day.get(index);
+        temperature_2m = data.temperature_2m.get(index);
+        apparent_temperature = data.apparent_temperature.get(index);
+        precipitation_probability = data.precipitation_probability.get(index);
+        weather_code = data.weather_code.get(index);
+        is_day = data.is_day.get(index);
         displayData();
     }
 

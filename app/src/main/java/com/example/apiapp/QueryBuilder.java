@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class QueryBuilder {
     private final float latitude;
@@ -41,6 +42,7 @@ public class QueryBuilder {
             this.dailyQueryParams = new ArrayList<>();
 
             var isoDateFormat =  new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            isoDateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Rome"));
             this.startDate = isoDateFormat.format(new Date());
             this.endDate = startDate;
         }

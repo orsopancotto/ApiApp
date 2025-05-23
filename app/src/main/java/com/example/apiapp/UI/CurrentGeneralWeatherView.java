@@ -7,11 +7,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.apiapp.CWDataBoundView;
+import com.example.apiapp.DataBoundView;
 import com.example.apiapp.R;
 import com.example.apiapp.WeatherModel;
 import com.example.apiapp.enums.WeatherCode;
 
-public class CurrentGeneralWeatherView extends DataBoundView {
+public class CurrentGeneralWeatherView extends CWDataBoundView {
 
     TextView tvGeneralInfos;
     private float temperature_2m;
@@ -24,7 +26,7 @@ public class CurrentGeneralWeatherView extends DataBoundView {
     }
 
     @Override
-    protected int setViewResource() {
+    protected int getViewResource() {
         return R.layout.view_current_general_infos;
     }
 
@@ -46,16 +48,16 @@ public class CurrentGeneralWeatherView extends DataBoundView {
     }
 
     @Override
-    public void bindData(@Nullable WeatherModel data, @Nullable String indexValue) {
+    public void bindData(@Nullable WeatherModel.Current data) {
         if(data == null){
             displayDebugMessage();
             return;
         }
 
-        temperature_2m = data.current.temperature_2m;
-        weather_code = data.current.weather_code;
-        apparent_temperature = data.current.apparent_temperature;
-        is_day = data.current.is_day;
+        temperature_2m = data.temperature_2m;
+        weather_code = data.weather_code;
+        apparent_temperature = data.apparent_temperature;
+        is_day = data.is_day;
 
         displayData();
     }
