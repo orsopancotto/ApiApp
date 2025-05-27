@@ -15,13 +15,12 @@ import android.widget.ViewSwitcher;
 import com.example.apiapp.Client;
 import com.example.apiapp.interfaces.CurrentWeatherResponseListener;
 import com.example.apiapp.R;
-import com.example.apiapp.DataBoundView;
 import com.example.apiapp.WeatherModel;
 import com.example.apiapp.interfaces.HourlyWeatherResponseListener;
 
-import java.util.ArrayList;
-
 public class CurrentWeatherFragment extends Fragment implements CurrentWeatherResponseListener, HourlyWeatherResponseListener {
+
+    private boolean hasBeenInitialized = false;
 
     public CurrentWeatherFragment() {
         // Required empty public constructor
@@ -42,7 +41,10 @@ public class CurrentWeatherFragment extends Fragment implements CurrentWeatherRe
     @Override
     public void onStart() {
         super.onStart();
+        if(!hasBeenInitialized) initialize();
+    }
 
+    private void initialize(){
         ViewSwitcher viewSwitcher = requireActivity().findViewById(R.id.vsViewSwitcher);
 
         Button button = requireActivity().findViewById(R.id.btnSwitchView);
@@ -54,6 +56,8 @@ public class CurrentWeatherFragment extends Fragment implements CurrentWeatherRe
 
         Client.getCurrentWeather(this);
         Client.getHourlyWeather(this);
+
+        hasBeenInitialized = true;
     }
 
     @Override
@@ -76,14 +80,15 @@ public class CurrentWeatherFragment extends Fragment implements CurrentWeatherRe
     }
 
     @Override
-    public void handleResponseCode(int code, String errorMessage) {
+    public void handleResponseCode(String errorMessage) {
+        Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void handleResponseCode(int code) {
         String message = "";
 
         switch (code){
-            case 0:
-                message = errorMessage;
-                break;
-
             case 404:
                 message = "Not found";
                 break;

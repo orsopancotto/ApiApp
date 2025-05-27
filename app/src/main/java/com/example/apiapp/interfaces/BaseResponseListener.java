@@ -2,5 +2,6 @@ package com.example.apiapp.interfaces;
 
 public interface BaseResponseListener {
     public void onRawJsonResponse(String json);
-    public void handleResponseCode(int code, String errorMessage);
+    public void handleResponseCode(String errorMessage);
+    public void handleResponseCode(int code);
 }

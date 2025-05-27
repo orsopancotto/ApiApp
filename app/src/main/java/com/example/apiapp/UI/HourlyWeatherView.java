@@ -39,11 +39,11 @@ public class HourlyWeatherView extends HWDataBoundView {
     protected void displayData() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH", Locale.getDefault());
         dateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Rome"));
-        String currentHour = dateFormat.format(new Date());
+        int startingHour = Integer.parseInt(dateFormat.format(new Date())) + 1;
 
         var hoursLeft = data.time
                 .stream()
-                .filter(h -> Integer.parseInt(h.substring(h.length() - 5, h.length() - 3)) >= Integer.parseInt(currentHour))
+                .filter(h -> Integer.parseInt(h.substring(h.length() - 5, h.length() - 3)) >= startingHour)
                 .collect(Collectors.toList());
 
         for(var hour : hoursLeft) {

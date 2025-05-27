@@ -23,7 +23,7 @@ public final class Client {
         throw new AssertionError("Static!");
     }
 
-    public static void create(){
+    public static void start(){
         if(controller != null || currentWeatherCalls != null) return;
 
         Retrofit retrofit = new Retrofit
@@ -57,11 +57,7 @@ public final class Client {
             @Override
             public void onResponse(Call<WeatherModel> call, Response<WeatherModel> response){
                 if(response.code() != 200){
-                    listener.handleResponseCode(response.code(), "");
-                    currentWeatherCalls.remove(call);
-                }
-                else if(response.body() == null){
-                    listener.handleResponseCode(response.code(), "Null response");
+                    listener.handleResponseCode(response.code());
                     currentWeatherCalls.remove(call);
                 }
 
@@ -71,7 +67,7 @@ public final class Client {
 
             @Override
             public void onFailure(Call<WeatherModel> call, Throwable throwable) {
-                listener.handleResponseCode(0, throwable.getMessage());
+                listener.handleResponseCode(throwable.getMessage());
                 listener.onResponse(null);
                 currentWeatherCalls.remove(call);
             }
@@ -93,11 +89,11 @@ public final class Client {
             @Override
             public void onResponse(Call<WeatherModel> call, Response<WeatherModel> response){
                 if(response.code() != 200){
-                    listener.handleResponseCode(response.code(), "");
+                    listener.handleResponseCode(response.code());
                     currentWeatherCalls.remove(call);
                 }
                 else if(response.body() == null){
-                    listener.handleResponseCode(response.code(), "Null response");
+                    listener.handleResponseCode(response.code());
                     currentWeatherCalls.remove(call);
                 }
 
@@ -107,7 +103,7 @@ public final class Client {
 
             @Override
             public void onFailure(Call<WeatherModel> call, Throwable throwable) {
-                listener.handleResponseCode(0, throwable.getMessage());
+                listener.handleResponseCode(throwable.getMessage());
                 listener.onResponse(null);
                 currentWeatherCalls.remove(call);
             }
@@ -129,7 +125,7 @@ public final class Client {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response){
                 if(response.code() != 200){
-                    listener.handleResponseCode(response.code(), "");
+                    listener.handleResponseCode(response.code());
                     currentWeatherCalls.remove(call);
                 }
 
@@ -139,7 +135,7 @@ public final class Client {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable throwable) {
-                listener.handleResponseCode(0, throwable.getMessage());
+                listener.handleResponseCode(throwable.getMessage());
                 listener.onRawJsonResponse("Err");
                 currentWeatherCalls.remove(call);
             }
